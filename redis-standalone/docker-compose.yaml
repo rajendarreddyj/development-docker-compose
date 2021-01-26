@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  redis-standalone:
+    image: 'bitnami/redis:latest'
+    ports:
+      - "6379"
+    network_mode: host
+    environment:
+      # REDIS_REPLICATION_MODE: The replication mode. Possible values master/slave. No defaults.
+      # REDIS_MASTER_HOST: Hostname/IP of replication master (replica node parameter). No defaults.
+      # REDIS_MASTER_PORT_NUMBER: Server port of the replication master (replica node parameter). Defaults to 6379.
+      # REDIS_MASTER_PASSWORD: Password to authenticate with the master (replica node parameter). No defaults. As an alternative, you can mount a file with the password and set the REDIS_MASTER_PASSWORD_FILE variable.
+      #- REDIS_REPLICATION_MODE=master
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      #  REDIS_PASSWORD environment variable when running the image for the first time will set the Redis server password to the value of REDIS_PASSWORD (or the content of the file specified in REDIS_PASSWORD_FILE).
+      #- REDIS_PASSWORD=my_master_password
+      # REDIS_DISABLE_COMMANDS: Comma-separated list of Redis commands to disable. Defaults to empty.    
+      #- REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+      # REDIS_AOF_ENABLED: image is set up to use the AOF (Append Only File) approach. Should you need to change this behaviour, setting the REDIS_AOF_ENABLED=no env variable will disable this feature.
+      #- REDIS_AOF_ENABLED=no
+    volumes:
+      - './redis_data:/bitnami/redis/data:rw'
+volumes:
+  redis_data:
+    driver: local
