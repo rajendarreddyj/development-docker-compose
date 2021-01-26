@@ -1,0 +1,31 @@
+version: '3.8'
+
+#networks:
+#  app-tier:
+#    driver: bridge
+    
+services:
+  redis:
+    image: 'bitnami/redis:latest'
+    network_mode: host
+    ports:
+      - "6379:6379"
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      #- REDIS_REPLICATION_MODE=master
+      #- REDIS_PASSWORD=my_master_password
+      #- REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+      #- REDIS_AOF_ENABLED=no
+    #command: /opt/bitnami/scripts/redis/run.sh --maxmemory 100mb      
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+    #networks:
+     #- app-tier
+  #myapp:
+  #  image: 'YOUR_APPLICATION_IMAGE'
+  #  networks:
+  #   - app-tier      
+volumes:
+  redis_data:
+    driver: local
