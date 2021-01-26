@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  redis-standalone:
+    image: 'redislabs/redisinsight:latest'
+    ports:
+      - "8001"
+    network_mode: host
+    volumes:
+      - 'redisinsight:/db'
+volumes:
+  redisinsight:
+    driver: local
