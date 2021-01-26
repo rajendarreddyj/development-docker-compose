@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  sentinel:
+    build: .
+    environment:
+      - REQUIREPASS=12345678
+      - SENTINEL_QUORUM=1
+      - CLIENTPORT=26479
+      - MASTERPORT=6479
+      - MASTERHOST=localhost
+      - MASTERNAME=mymaster
+    network_mode: "host"
+    image: crossz/sentinel-redis-distributed
