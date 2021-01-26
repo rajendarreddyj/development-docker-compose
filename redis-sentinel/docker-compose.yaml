@@ -1,0 +1,80 @@
+version: '3.8'
+# docker-compose up --detach --scale redis-primary=1 --scale redis-secondary=2 --scale redis-sentinel=2
+networks:
+  app-tier:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+    
+services:
+  redis-primary:
+    image: 'bitnami/redis:latest'
+    environment:
+      # REDIS_REPLICATION_MODE: The replication mode. Possible values master/slave. No defaults.
+      # REDIS_MASTER_HOST: Hostname/IP of replication master (replica node parameter). No defaults.
+      # REDIS_MASTER_PORT_NUMBER: Server port of the replication master (replica node parameter). Defaults to 6379.
+      # REDIS_MASTER_PASSWORD: Password to authenticate with the master (replica node parameter). No defaults. As an alternative, you can mount a file with the password and set the REDIS_MASTER_PASSWORD_FILE variable.    
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=str0ng_passw0rd
+    networks:
+      - app-tier
+    ports:
+      - '6379'
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+  redis-secondary:
+    image: 'bitnami/redis:latest'
+    environment:
+      # REDIS_REPLICATION_MODE: The replication mode. Possible values master/slave. No defaults.
+      # REDIS_MASTER_HOST: Hostname/IP of replication master (replica node parameter). No defaults.
+      # REDIS_MASTER_PORT_NUMBER: Server port of the replication master (replica node parameter). Defaults to 6379.
+      # REDIS_MASTER_PASSWORD: Password to authenticate with the master (replica node parameter). No defaults. As an alternative, you can mount a file with the password and set the REDIS_MASTER_PASSWORD_FILE variable.
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-primary
+      - REDIS_MASTER_PASSWORD=str0ng_passw0rd
+      - REDIS_PASSWORD=str0ng_passw0rd
+    ports:
+      - '6379'
+    depends_on:
+      - redis-primary
+    networks:
+      - app-tier
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+  redis-sentinel:
+    image: 'bitnami/redis-sentinel:latest'
+    environment:
+      # REDIS_MASTER_HOST: Host of the Redis master to monitor. Default: redis
+      - REDIS_MASTER_HOST=redis-primary
+      # REDIS_MASTER_PORT_NUMBER: Port of the Redis master to monitor. Default: 6379.
+      - REDIS_MASTER_PORT_NUMBER=6379
+      # REDIS_MASTER_SET: Name of the set of Redis instances to monitor. Default: mymaster.
+      - REDIS_MASTER_SET=mymaster
+      # REDIS_MASTER_PASSWORD: Password to authenticate with the master. No defaults. As an alternative, you can mount a file with the password and set the REDIS_MASTER_PASSWORD_FILE variable.
+      - REDIS_MASTER_PASSWORD=str0ng_passw0rd
+      # REDIS_MASTER_USER: Username to authenticate with when ACL is enabled for the master. No defaults. This is available only for redis 6 or higher. If not specified, Redis Sentinel will try to authenticate with just the password (using sentinel auth-pass <master-name> <password>).
+      # REDIS_SENTINEL_PORT_NUMBER: Redis Sentinel port. Default: 26379.
+      # REDIS_SENTINEL_QUORUM: Number of Sentinels that need to agree about the fact the master is not reachable. Default: 2.
+      # REDIS_SENTINEL_PASSWORD: Password to authenticate with this sentinel and to authenticate to other sentinels. No defaults. Needs to be identical on all sentinels. As an alternative, you can mount a file with the password and set the REDIS_SENTINEL_PASSWORD_FILE variable.
+      # REDIS_SENTINEL_DOWN_AFTER_MILLISECONDS: Number of milliseconds before master is declared down. Default: 60000.
+      # REDIS_SENTINEL_FAILOVER_TIMEOUT: Specifies the failover timeout in milliseconds. Default: 180000.
+      # REDIS_SENTINEL_TLS_ENABLED: Whether to enable TLS for traffic or not. Default: no.
+      - REDIS_SENTINEL_TLS_ENABLED:no      
+      # REDIS_SENTINEL_TLS_PORT_NUMBER: Port used for TLS secure traffic. Default: 26379.
+      #- REDIS_SENTINEL_TLS_PORT_NUMBER=26379
+      # REDIS_SENTINEL_TLS_CERT_FILE: File containing the certificate file for the TSL traffic. No defaults.
+      # REDIS_SENTINEL_TLS_KEY_FILE: File containing the key for certificate. No defaults.
+      # REDIS_SENTINEL_TLS_CA_FILE: File containing the CA of the certificate. No defaults.
+      # REDIS_SENTINEL_TLS_DH_PARAMS_FILE: File containing DH params (in order to support DH based ciphers). No defaults.
+      # REDIS_SENTINEL_TLS_AUTH_CLIENTS: Whether to require clients to authenticate or not. Default: yes.
+      # REDIS_SENTINEL_ANNOUNCE_IP: Use the specified IP address in the HELLO messages used to gossip its presence. Default: auto-detected local address.
+      # REDIS_SENTINEL_ANNOUNCE_PORT: Use the specified port in the HELLO messages used to gossip its presence. Default: port specified in REDIS_SENTINEL_PORT_NUMBER.
+    depends_on:
+      - redis-primary
+      - redis-secondary
+    ports:
+      - '26379-26381:26379'
+    networks:
+      - app-tier
