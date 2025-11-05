@@ -1,4 +1,4 @@
-FROM redis:6.0-alpine
+FROM redis:6.2.21-alpine
 
 MAINTAINER rajendarreddy.jagapathi (rajendarreddyj@gmail.com)
 
